@@ -1,4 +1,4 @@
-function [chromosome_NDS_CD front] = NDS_CD_cons(population,V,M)
+function [chromosome_NDS_CD,front] = NDS_CD_cons(population,V,M)
 problem_type  = 0;
 
 chromosome_NDS_CD1=[];
@@ -28,8 +28,6 @@ rank = 1;
 if problem_type==0 || problem_type==0.5
     pop_size1 = size(chromosome,1);
     f = chromosome(:,V+1:V+M);
-    f1 = chromosome(:,V+1);   % objective function values
-    f2 = chromosome(:,V+2);
 
     n = zeros(1,pop_size1);
     for p=1:pop_size1
@@ -37,9 +35,10 @@ if problem_type==0 || problem_type==0.5
         for q=1:pop_size1
             p_ind = f(p,:);
             q_ind = f(q,:);
-            if judge_dominate(p_ind, q_ind) == 1
+            domination = judge_dominate(p_ind, q_ind);
+            if domination == 1
                 struct(p).sp = [struct(p).sp ;q];
-            elseif judge_dominate(q_ind, p_ind) == 1
+            elseif domination == -1
                 n(p) = n(p) + 1;
             end
         end
@@ -109,21 +108,17 @@ chromosome_NDS_CD = [chromosome_NDS_CD1;infpop];
 end
 
 function dom = judge_dominate(y1,y2)
-[N,~] = size(y1);
-les_eq = 0;
-les = 0;
-for i=1:N
-    if y1 <= y2
-        les_eq = les_eq +1;
+tmp_res = y1 - y2;
+if tmp_res <= 0 
+    if tmp_res~= 0 
+        dom = 1;
+    else
+        dom = 0;
     end
-    if y1 < y2
-        les = les+1;
-    end
-end
-
-if les_eq == N && les >0
-    dom = 1;
+elseif tmp_res >= 0
+    dom = -1;
 else
     dom = 0;
 end
+
 end
